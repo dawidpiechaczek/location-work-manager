@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">location-work-manager</string>
+    <string name="notification_location_foreground_id">location_notification_id</string>
+    <string name="notification_title">Running in background</string>
+    <string name="notification_location_channel_id">location_channel_id</string>
+    <string name="notification_location_channel_name">Location</string>
+</resources>
