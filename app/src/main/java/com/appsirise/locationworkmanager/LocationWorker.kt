@@ -20,21 +20,20 @@ import androidx.work.ForegroundInfo
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.google.android.gms.location.*
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 
 const val TAG = "LocationWorkManager"
 
 @HiltWorker
-class LocationWorkManager(
-    context: Context,
-    parameters: WorkerParameters
-) : Worker(context, parameters) {
-
-    @Inject
-    lateinit var locationRepository: LocationRepository
+class LocationWorker @AssistedInject constructor(
+    @Assisted appContext: Context,
+    @Assisted workerParams: WorkerParameters,
+    private val locationRepository: LocationRepository
+) : Worker(appContext, workerParams) {
 
     private val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     private val locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {

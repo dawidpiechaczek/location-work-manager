@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val workManager = WorkManager.getInstance(this)
-        val workRequest = OneTimeWorkRequest.from(LocationWorkManager::class.java)
+        val workRequest = OneTimeWorkRequest.from(LocationWorker::class.java)
 
         workManager.getWorkInfoByIdLiveData(workRequest.id)
             .observe(this) { workInfo: WorkInfo? ->

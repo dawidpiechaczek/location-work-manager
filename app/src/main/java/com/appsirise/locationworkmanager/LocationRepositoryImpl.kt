@@ -1,10 +1,10 @@
 package com.appsirise.locationworkmanager
 
-class LocationRepositoryImpl(
-    appDatabase: AppDatabase
-): LocationRepository {
+import javax.inject.Inject
 
-    private val locationDao: LocationDao = appDatabase.locationDao()
+class LocationRepositoryImpl @Inject constructor(
+    private val locationDao: LocationDao
+): LocationRepository {
 
     override fun insert(location: LocationEntity) {
         locationDao.insert(location)
