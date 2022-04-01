@@ -22,6 +22,12 @@ import androidx.work.WorkerParameters
 import com.google.android.gms.location.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
+import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 const val TAG = "LocationWorkManager"
 
@@ -32,6 +38,7 @@ class LocationWorker @AssistedInject constructor(
     private val locationRepository: LocationRepository
 ) : Worker(appContext, workerParams) {
 
+    private val compositeDisposable = CompositeDisposable()
     private val notificationManager =
         appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -39,11 +46,16 @@ class LocationWorker @AssistedInject constructor(
         override fun onLocationResult(locationResult: LocationResult) {
             val location: Location = locationResult.lastLocation
             Log.d(TAG, "Location saved successfully")
+            compositeDisposable.clear()
             saveLocation(location)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy({ error -> Log.e("LocationWorker", error.message ?: "") })
+                .addTo(compositeDisposable)
         }
     }
 
-    private fun saveLocation(location: Location) {
+    private fun saveLocation(location: Location): Completable = Completable.fromAction {
         locationRepository.insert(
             LocationEntity(
                 latitude = location.latitude,
@@ -81,8 +93,8 @@ class LocationWorker @AssistedInject constructor(
     @SuppressLint("MissingPermission")
     private fun requestFusedLocationUpdates() {
         val request = LocationRequest.create().apply {
-            interval = 4 * 60 * 1000
-            fastestInterval = 1 * 60 * 1000
+            interval = 30 * 1000
+            fastestInterval = 30 * 1000
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
 
@@ -102,7 +114,8 @@ class LocationWorker @AssistedInject constructor(
         val notification = NotificationCompat.Builder(applicationContext, id)
             .setContentTitle(title)
             .setTicker(title)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setCategory(Notification.CATEGORY_SERVICE)
             .setOngoing(true)
             .build()
 
