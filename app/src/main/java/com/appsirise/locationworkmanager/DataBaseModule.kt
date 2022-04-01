@@ -19,9 +19,11 @@ class DataBaseModule {
         Room.databaseBuilder(context, AppDatabase::class.java, AppDatabase.DB_NAME).build()
 
     @Provides
+    @Singleton
     fun provideLocationDao(appDatabase: AppDatabase): LocationDao = appDatabase.locationDao()
 
     @Provides
+    @Singleton
     fun provideLocationRepository(locationDao: LocationDao): LocationRepository =
         LocationRepositoryImpl(locationDao)
 }
